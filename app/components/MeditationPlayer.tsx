@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Card } from '@/components/ui/card'
-import { Infinity, Share2, ThumbsDown, Heart } from 'lucide-react'
+import { Volume2 } from 'lucide-react'
 import AudioPlayer from 'react-h5-audio-player'
 
 interface MeditationPlayerProps {

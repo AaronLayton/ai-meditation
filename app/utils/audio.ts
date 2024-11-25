@@ -1,6 +1,5 @@
 export function fadeAudio(audioElement: HTMLAudioElement, from: number, to: number, duration: number): Promise<void> {
   const steps = 30
-  const stepValue = (to - from) / steps
   const stepDuration = duration / steps
 
   return new Promise((resolve) => {
