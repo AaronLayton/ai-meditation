@@ -1,4 +1,3 @@
-import { title } from 'process'
 import { Card } from '@/components/ui/card'
 import { Volume2 } from 'lucide-react'
 import AudioPlayer from 'react-h5-audio-player'
@@ -37,11 +36,6 @@ export function MeditationPlayer({ title, audioUrl, onPlay, onPause, onEnded }: 
         showJumpControls={false}
         layout="stacked"
         className="meditation-player"
-        customProgressBarSection={[
-          "PROGRESS_BAR",
-          "CURRENT_TIME",
-          "DURATION",
-        ]}
         onPlay={handlePlay}
         onPause={handlePause}
         onEnded={onEnded}
