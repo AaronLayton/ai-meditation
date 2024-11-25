@@ -1,101 +1,198 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+import { useState, useEffect, useRef } from 'react'
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { SendHorizontal, Loader2 } from 'lucide-react'
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import { generateMeditation } from './actions'
+import AudioPlayer from 'react-h5-audio-player';
+import 'react-h5-audio-player/lib/styles.css';
+import { fadeAudio } from './utils/audio';
+import { MeditationPlayer } from './components/MeditationPlayer';
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
 }
+
+export default function MeditationApp() {
+  const [prompt, setPrompt] = useState('')
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [audioUrl, setAudioUrl] = useState('')
+  const [isDarkMode, setIsDarkMode] = useState(true)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const backgroundAudioRef = useRef<HTMLAudioElement>(null)
+  const [meditationTitle, setMeditationTitle] = useState('')
+
+  useEffect(() => {
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    setIsDarkMode(darkModeMediaQuery.matches)
+
+    const handleChange = (e: MediaQueryListEvent) => setIsDarkMode(e.matches)
+    darkModeMediaQuery.addEventListener('change', handleChange)
+
+    return () => darkModeMediaQuery.removeEventListener('change', handleChange)
+  }, [])
+
+  const handleGenerate = async () => {
+    try {
+      console.log('Button clicked, prompt:', prompt)
+      setIsGenerating(true)
+      const result = await generateMeditation(prompt)
+      
+      console.log('Generation result:', result)
+      
+      if (result.success) {
+        console.log('Creating audio blob from base64 string')
+        const audioBlob = Buffer.from(result.audioContent ?? '', 'base64')
+        const audioUrl = URL.createObjectURL(new Blob([audioBlob], { type: 'audio/mpeg' }))
+        console.log('Audio URL created:', audioUrl)
+        setMeditationTitle(result.title)
+        setAudioUrl(audioUrl)
+      } else {
+        console.error('Generation failed:', result.error)
+      }
+    } catch (error) {
+      console.error('Error in handleGenerate:', error)
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  // Clean up audio URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl)
+      }
+    }
+  }, [audioUrl])
+
+  // Fix the key prop warning by using a stable identifier
+  const examplePrompts = [
+    { id: 1, text: "Five-minute meditation on self-compassion" },
+    { id: 2, text: "Ten-minute meditation on simple mindfulness" },
+    { id: 3, text: "Seven-minute meditation on facing difficult emotions" },
+    { id: 4, text: "Three-minute breathing exercise" },
+  ]
+
+  const handlePlay = async () => {
+    if (backgroundAudioRef.current) {
+      // Start with volume at 0
+      backgroundAudioRef.current.volume = 0
+      backgroundAudioRef.current.play()
+      // Fade in background music first
+      await fadeAudio(backgroundAudioRef.current, 0, 0.35, 1000) // Increased max volume to 0.35
+      // Wait for 1 second before starting meditation
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
+  }
+
+  const handlePause = async () => {
+    if (backgroundAudioRef.current) {
+      // Fade out background music
+      await fadeAudio(backgroundAudioRef.current, backgroundAudioRef.current.volume, 0, 1000)
+      backgroundAudioRef.current.pause()
+    }
+  }
+
+  const handleEnded = async () => {
+    if (backgroundAudioRef.current) {
+      // Keep playing for a moment after meditation ends
+      await new Promise(resolve => setTimeout(resolve, 500))
+      // Then fade out
+      await fadeAudio(backgroundAudioRef.current, backgroundAudioRef.current.volume, 0, 1500)
+      backgroundAudioRef.current.pause()
+    }
+  }
+
+  return (
+    <div className={`min-h-screen ${isDarkMode ? 'dark' : ''}`}>
+      <div className="min-h-screen bg-background text-foreground dark:bg-gray-900 dark:text-gray-100">
+        <div className="container max-w-md mx-auto p-4 flex flex-col h-screen">
+          <header className="py-6">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text">
+              {getGreeting()}
+            </h1>
+          </header>
+
+          <ScrollArea className="w-full mb-6">
+            <div className="flex w-full space-x-3 pb-4">
+              {examplePrompts.map((prompt) => (
+                <Card 
+                  key={prompt.id}
+                  className="p-4 flex-shrink-0 w-[160px] h-[100px] dark:bg-gray-800 bg-gray-100/40 overflow-hidden cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  onClick={() => {
+                    setPrompt(prompt.text)
+                    const inputElement = document.querySelector('input[type="text"]') as HTMLInputElement
+                    if (inputElement) {
+                      inputElement.focus()
+                    }
+                  }}
+                >
+                  <p className="text-sm text-muted-foreground dark:text-gray-400 line-clamp-3 break-words">
+                    {prompt.text}
+                  </p>
+                </Card>
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+
+          {audioUrl && (
+            <div className="mb-6">
+              <MeditationPlayer
+                title={meditationTitle}
+                audioUrl={audioUrl}
+                onPlay={handlePlay}
+                onPause={handlePause}
+                onEnded={handleEnded}
+              />
+              <audio 
+                ref={backgroundAudioRef} 
+                src="/tracks/meditation-background.mp3" 
+                loop 
+                crossOrigin="anonymous"
+              >
+                <track kind="captions" />
+              </audio>
+            </div>
+          )}
+
+          <div className="mt-auto">
+            <div className="relative flex items-center mb-4">
+              <input
+                type="text"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Type your meditation prompt..."
+                className="w-full p-4 rounded-full bg-muted/50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-16"
+                aria-label="Meditation prompt input"
+              />
+              <div className="absolute right-2">
+                <Button
+                  size="icon"
+                  className="rounded-full"
+                  onClick={handleGenerate}
+                  disabled={isGenerating || !prompt.trim()}
+                  aria-label="Generate meditation"
+                >
+                  {isGenerating ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <SendHorizontal className="h-5 w-5" />
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
