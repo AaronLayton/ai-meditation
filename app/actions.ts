@@ -27,7 +27,7 @@ export async function generateMeditation(prompt: string): Promise<MeditationResp
     console.log('Starting meditation generation with prompt:', prompt)
     // gemini-exp-1121 is the latest model
     // gemini-1.5-flash-8b is a quicker model
-    const model = genAI.getGenerativeModel({ model: 'gemini-exp-1121' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-8b' })
     
     const duration = extractDuration(prompt)
     console.log('Extracted duration:', duration)

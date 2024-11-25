@@ -78,11 +78,15 @@ export default function MeditationApp() {
 
   const handlePlay = async () => {
     if (backgroundAudioRef.current) {
-      // Start with volume at 0
-      backgroundAudioRef.current.volume = 0
-      backgroundAudioRef.current.play()
-      // Fade in background music first
-      await fadeAudio(backgroundAudioRef.current, 0, 0.35, 1000) // Increased max volume to 0.35
+      // Reset the audio to start from beginning only if it's not already playing
+      if (backgroundAudioRef.current.paused) {
+        backgroundAudioRef.current.currentTime = 0
+        // Start with volume at 0
+        backgroundAudioRef.current.volume = 0
+        backgroundAudioRef.current.play()
+        // Fade in background music first
+        await fadeAudio(backgroundAudioRef.current, 0, 0.35, 1000)
+      }
       // Wait for 1 second before starting meditation
       await new Promise(resolve => setTimeout(resolve, 1000))
     }
@@ -93,6 +97,7 @@ export default function MeditationApp() {
       // Fade out background music
       await fadeAudio(backgroundAudioRef.current, backgroundAudioRef.current.volume, 0, 1000)
       backgroundAudioRef.current.pause()
+      // Don't reset currentTime here to maintain position
     }
   }
 
@@ -103,6 +108,8 @@ export default function MeditationApp() {
       // Then fade out
       await fadeAudio(backgroundAudioRef.current, backgroundAudioRef.current.volume, 0, 1500)
       backgroundAudioRef.current.pause()
+      // Reset position for next play
+      backgroundAudioRef.current.currentTime = 0
     }
   }
 
