@@ -73,7 +73,7 @@ export default function MeditationApp() {
     { id: 1, text: "Five-minute meditation on self-compassion" },
     { id: 2, text: "Ten-minute meditation on simple mindfulness" },
     { id: 3, text: "Seven-minute meditation on facing difficult emotions" },
-    { id: 4, text: "Three-minute breathing exercise" },
+    { id: 4, text: "Three-minute breathing exercise for relaxation" },
   ]
 
   const handlePlay = async () => {
