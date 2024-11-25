@@ -6,8 +6,6 @@ import { Card } from "@/components/ui/card"
 import { SendHorizontal, Loader2 } from 'lucide-react'
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { generateMeditation } from './actions'
-import AudioPlayer from 'react-h5-audio-player';
-import 'react-h5-audio-player/lib/styles.css';
 import { fadeAudio } from './utils/audio';
 import { MeditationPlayer } from './components/MeditationPlayer';
 
@@ -23,8 +21,6 @@ export default function MeditationApp() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [audioUrl, setAudioUrl] = useState('')
   const [isDarkMode, setIsDarkMode] = useState(true)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const audioRef = useRef<HTMLAudioElement>(null)
   const backgroundAudioRef = useRef<HTMLAudioElement>(null)
   const [meditationTitle, setMeditationTitle] = useState('')
 

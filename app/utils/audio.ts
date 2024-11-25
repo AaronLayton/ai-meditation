@@ -8,7 +8,6 @@ export function fadeAudio(audioElement: HTMLAudioElement, from: number, to: numb
 
     const fade = () => {
       currentStep++
-      const newVolume = from + stepValue * currentStep
       const easedVolume = to > from 
         ? Math.pow(currentStep / steps, 2) * (to - from) + from
         : (1 - Math.pow(1 - currentStep / steps, 2)) * (to - from) + from

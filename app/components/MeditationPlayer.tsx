@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Card } from '@/components/ui/card'
-import { Infinity, Share2, ThumbsDown, Heart, Volume2 } from 'lucide-react'
+import { Infinity, Share2, ThumbsDown, Heart } from 'lucide-react'
 import AudioPlayer from 'react-h5-audio-player'
 
 interface MeditationPlayerProps {
@@ -12,8 +12,6 @@ interface MeditationPlayerProps {
 }
 
 export function MeditationPlayer({ title, audioUrl, onPlay, onPause, onEnded }: MeditationPlayerProps) {
-  const [isLiked, setIsLiked] = useState(false)
-
   const handlePlay = async () => {
     await onPlay()
   }
