@@ -44,7 +44,7 @@ export default function MeditationApp() {
       
       if (result.success) {
         console.log('Creating audio blob from base64 string')
-        const audioBlob = Buffer.from(result.audioContent ?? '', 'base64')
+        const audioBlob = Buffer.from(result.audioContent, 'base64')
         const audioUrl = URL.createObjectURL(new Blob([audioBlob], { type: 'audio/mpeg' }))
         console.log('Audio URL created:', audioUrl)
         setMeditationTitle(result.title)

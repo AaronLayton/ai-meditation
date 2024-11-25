@@ -6,7 +6,18 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_KEY!)
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY!
 const VOICE_ID = process.env.VOICE_ID!
 
-export async function generateMeditation(prompt: string) {
+// Add this interface at the top of the file
+interface MeditationResponse {
+  success: true
+  title: string
+  meditation: string
+  audioContent: string
+} | {
+  success: false
+  error: string
+}
+
+export async function generateMeditation(prompt: string): Promise<MeditationResponse> {
   'use server'
   try {
     console.log('Starting meditation generation with prompt:', prompt)
@@ -64,7 +75,7 @@ Duration: ${duration} minutes
     
     return { 
       success: true, 
-      title: title,
+      title: title || 'Mindful Moment',
       meditation: meditationText,
       audioContent: base64Audio 
     }
