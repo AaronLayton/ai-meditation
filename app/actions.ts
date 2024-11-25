@@ -49,7 +49,7 @@ Duration: ${duration} minutes
     const fullText = response.text()
     
     // Split the response into title and meditation
-    const titleMatch = fullText.match(/TITLE:(.*?)MEDITATION:/s)
+    const titleMatch = fullText.match(/TITLE:([^]*?)MEDITATION:/);
     const meditationText = fullText.split('MEDITATION:')[1]?.trim() || fullText
     const title = titleMatch?.[1]?.trim() || 'Mindful Moment'
     
