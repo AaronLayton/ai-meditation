@@ -6,16 +6,20 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_KEY!)
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY!
 const VOICE_ID = process.env.VOICE_ID!
 
-// Add this interface at the top of the file
-interface MeditationResponse {
+// Fix the interface definition
+interface SuccessResponse {
   success: true
   title: string
   meditation: string
   audioContent: string
-} | {
+}
+
+interface ErrorResponse {
   success: false
   error: string
 }
+
+type MeditationResponse = SuccessResponse | ErrorResponse
 
 export async function generateMeditation(prompt: string): Promise<MeditationResponse> {
   'use server'
@@ -81,7 +85,10 @@ Duration: ${duration} minutes
     }
   } catch (error) {
     console.error('Error in generateMeditation:', error)
-    return { success: false, error: 'Failed to generate meditation. Please try again.' }
+    return { 
+      success: false, 
+      error: 'Failed to generate meditation. Please try again.' 
+    }
   }
 }
 
